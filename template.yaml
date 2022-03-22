@@ -68,7 +68,7 @@ Parameters:
     Default: "cron(0 18 * * ? *)"
   cloudFrontDistributions:
     Type: String
-    Description: CloudFront distributions ID separated by commas. Use * for ALL. Get IDs from https://console.aws.amazon.com/cloudfront/home or from CLI (aws cloudfront list-distributions --query "DistributionList.Items[*].Id")
+    Description: CloudFront distributions ID separated by commas. Use * for ALL. Get IDs from https://console.aws.amazon.com/cloudfront/home or from CLI (aws cloudfront list-distributions --query "DistributionList.Items[*].[Id,DomainName,Aliases]")
     Default: "*"
   cloudFrontObjectPaths:
     Type: String
