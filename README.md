@@ -10,7 +10,7 @@ As part of development process, you may want to [invalidate](https://docs.aws.am
 ## About Invalidation
 Invalidation does not ensure that viewers have latest content as the objects may be cached by downstream web proxies and/or browsers. Refer to [Updating existing content with a CloudFront distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/UpdatingExistingObjects.html) and [Optimizing caching and availability](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ConfiguringCaching.html) for different considerations. Useful blog posts include [Improve your website performance with Amazon CloudFront](https://aws.amazon.com/blogs/networking-and-content-delivery/improve-your-website-performance-with-amazon-cloudfront/) and [Amazon CloudFront Cache Strategy for Successful Global Game Deployment](https://aws.amazon.com/blogs/apn/amazon-cloudfront-cache-strategy-for-successful-global-game-deployment/) 
 
-There may be additional charges from the invalidation. Refer to [Amazon CloudFront Pricing](https://aws.amazon.com/cloudfront/pricing/) for more information. 
+There may be additional charges from invalidation. Refer to [Amazon CloudFront Pricing](https://aws.amazon.com/cloudfront/pricing/) for more information. 
 
 
 ## Deployment via CloudFormation console
@@ -30,7 +30,7 @@ After your stack has been successfully created, its status changes to **CREATE_C
 
 
 ## Monitoring 
-The CloudFormation stack Outputs section links to Lambda [CloudWatch Logs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html) and CloudFront CreateInvalidation events in [CloudTrail Event history](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/view-cloudtrail-events.html). 
+The CloudFormation stack Outputs section links to Lambda [CloudWatch Logs](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html) and CreateInvalidation events in [CloudTrail Event history](https://docs.aws.amazon.com/awscloudtrail/latest/userguide/view-cloudtrail-events.html). 
 
 
 ## Security
