@@ -8,7 +8,7 @@
 As part of development process, you may want to [invalidate](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html) your content, which is to remove cached content from all CloudFront edge locations, on a scheduled basis. This solution allows you to schedule invalidation and specify CloudFront distributions and object paths to invalidate. 
 
 ## About Invalidation
-Invalidation does not ensure that viewers have latest content as the objects may be cached by downstream web proxies and/or browsers. Refer to [Updating existing content with a CloudFront distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/UpdatingExistingObjects.html) for different considerations. 
+Invalidation does not ensure that viewers have latest content as the objects may be cached by downstream web proxies and/or browsers. Refer to [Updating existing content with a CloudFront distribution](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/UpdatingExistingObjects.html) and [Optimizing caching and availability](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/ConfiguringCaching.html) for different considerations. 
 
 There may be additional charges from the invalidation. Refer to [Amazon CloudFront Pricing](https://aws.amazon.com/cloudfront/pricing/) for more information. 
 
