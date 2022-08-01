@@ -49,34 +49,32 @@ Parameters:
     Type: String
     AllowedPattern: "[a-zA-Z0-9\\-_]{0,64}"
     Description: Name of Lambda function (letters, numbers, hyphens, or underscores with no spaces up to 64 characters in length) 
+    ConstraintDescription: Enter a valid name
     Default: CloudFront-Invalidator
   pythonRuntime:
     Type: String
     AllowedPattern: "python3\\.\\d{1,2}"
-    Description: Python 3 runtime version. See https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html
+    Description: Python 3 runtime version ( https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html )
     Default: python3.9
   cpuArchitecture:
     Type: String
     AllowedValues:
       - x86_64
       - arm64
-    Description: Instruction set architecture (Intel/AMD or Graviton)
+    Description: Instruction set architecture
     Default: arm64
   cronExpression:
     Type: String
-    Description: Invalidation schedule. Default is 6 pm (UTC+0) daily. See https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule-schedule.html#eb-cron-expressions
+    Description: Invalidation schedule. Default is 6 pm (UTC+0) daily ( https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule-schedule.html#eb-cron-expressions )
     Default: "cron(0 18 * * ? *)"
   cloudFrontDistributions:
     Type: String
-    Description: CloudFront distributions ID separated by commas. Use * for ALL. Get IDs from https://console.aws.amazon.com/cloudfront/home or from CLI (aws cloudfront list-distributions --query "DistributionList.Items[*].[Id,DomainName,Aliases]")
+    Description: CloudFront distributions ID separated by commas. Use * for ALL. Get IDs from https://console.aws.amazon.com/cloudfront/home or from CLI ( aws cloudfront list-distributions --query "DistributionList.Items[*].[Id,DomainName,Aliases]" )
     Default: "*"
   cloudFrontObjectPaths:
     Type: String
-    Description: Invaldation paths separated by commas, e.g. /images/*,/css/* with /* for ALL. Note that * must be the last character in the invalidation path. See https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html#invalidation-specifying-objects-paths
+    Description: Invaldation paths separated by commas, e.g. /images/*,/css/* with /* for ALL. Note that * must be the last character in the invalidation path ( https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html#invalidation-specifying-objects-paths )
     Default: "/*"
-
-Conditions:
-  hasNoLambdaFunctionName: !Equals [!Ref lambdaFunctionName, '']
 
 Resources:
   lambdaFunctionIamRole:
@@ -100,12 +98,12 @@ Resources:
           - Effect: Allow
             Action:
               - logs:CreateLogGroup
-            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*
+            Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:*
           - Effect: Allow
             Action: 
             - logs:CreateLogStream
             - logs:PutLogEvents
-            Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${lambdaFunctionName}:*
+            Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${lambdaFunctionName}:*
           - Effect: Allow
             Action: 
             - cloudfront:ListDistributions
@@ -125,9 +123,10 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       Description: !Sub "[${AWS::StackName}] - Create CloudFront Invalidation"
-      FunctionName: !If [ hasNoLambdaFunctionName, !Ref AWS::NoValue, !Ref lambdaFunctionName] 
+      FunctionName: !Ref lambdaFunctionName
       Handler: "index.lambda_handler"
       MemorySize: 128
+      ReservedConcurrentExecutions: !Ref AWS::NoValue
       Role: !GetAtt lambdaFunctionIamRole.Arn
       Environment:
         Variables:
@@ -223,4 +222,3 @@ Outputs:
   cloudTrailEventHistory:
     Description: CloudTrail CreateInvalidation event history
     Value: https://console.aws.amazon.com/cloudtrail/home?region=us-east-1#/events?EventName=CreateInvalidation
-    
