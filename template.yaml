@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: CloudFront Invalidation Scheduler (MIT-0 license)
+Description: CloudFront Invalidation Scheduler ( https://github.com/aws-samples/cloudfront-invalidation-scheduler )
   
 Metadata:
   License:
@@ -28,7 +28,7 @@ Metadata:
         Parameters:
           - cloudFrontDistributions
           - cloudFrontObjectPaths
-          - cronExpression
+          - scheduleExpression
       -
         Label:
           default: Lambda configuration
@@ -41,8 +41,8 @@ Metadata:
         default: "[cloudFrontDistributions] Which CloudFront distributions to schedule invalidation?"
       cloudFrontObjectPaths:
         default: "[cloudFrontObjectPaths] What object paths to invalidate?"
-      cronExpression:
-        default: "[cronExpression] What is the invalidation schedule?"
+      scheduleExpression:
+        default: "[scheduleExpression] What is the invalidation schedule?"
         
 Parameters:
   lambdaFunctionName:
@@ -55,7 +55,7 @@ Parameters:
     Type: String
     AllowedPattern: "python3\\.\\d{1,2}"
     Description: Python 3 runtime version ( https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html )
-    Default: python3.9
+    Default: python3.10
   cpuArchitecture:
     Type: String
     AllowedValues:
@@ -63,9 +63,9 @@ Parameters:
       - arm64
     Description: Instruction set architecture
     Default: arm64
-  cronExpression:
+  scheduleExpression:
     Type: String
-    Description: Invalidation schedule. Default is 6 pm (UTC+0) daily ( https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule-schedule.html#eb-cron-expressions )
+    Description: Invalidation schedule in cron or rate expression format. Default is 6 pm (UTC+0) daily ( https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule-schedule.html )
     Default: "cron(0 18 * * ? *)"
   cloudFrontDistributions:
     Type: String
@@ -199,7 +199,7 @@ Resources:
     Type: AWS::Events::Rule
     Properties:
       Description: !Sub "[${AWS::StackName}] - Execute lambda [${lambdaFunctionName}]"
-      ScheduleExpression: !Ref cronExpression
+      ScheduleExpression: !Ref scheduleExpression
       Targets:
       - Arn: !GetAtt lambdaFunction.Arn
         Id: '1'
