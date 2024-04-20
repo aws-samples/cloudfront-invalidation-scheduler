@@ -1,18 +1,18 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: CloudFront Invalidation Scheduler ( https://github.com/aws-samples/cloudfront-invalidation-scheduler )
-  
+
 Metadata:
   License:
     Description: >
       Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
       SPDX-License-Identifier: MIT-0
-      
+
       Permission is hereby granted, free of charge, to any person obtaining a copy of this
       software and associated documentation files (the "Software"), to deal in the Software
       without restriction, including without limitation the rights to use, copy, modify,
       merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
       permit persons to whom the Software is furnished to do so.
-      
+
       THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
       INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
       PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
@@ -20,18 +20,16 @@ Metadata:
       OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
       SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-  AWS::CloudFormation::Interface: 
+  AWS::CloudFormation::Interface:
     ParameterGroups:
-      -
-        Label:
-          default: CloudFront configuration
+      - Label:
+          default: CloudFront
         Parameters:
           - cloudFrontDistributions
           - cloudFrontObjectPaths
           - scheduleExpression
-      -
-        Label:
-          default: Lambda configuration
+      - Label:
+          default: Lambda
         Parameters:
           - lambdaFunctionName
           - pythonRuntime
@@ -43,12 +41,12 @@ Metadata:
         default: "[cloudFrontObjectPaths] What object paths to invalidate?"
       scheduleExpression:
         default: "[scheduleExpression] What is the invalidation schedule?"
-        
+
 Parameters:
   lambdaFunctionName:
     Type: String
     AllowedPattern: "[a-zA-Z0-9\\-_]{0,64}"
-    Description: Name of Lambda function (letters, numbers, hyphens, or underscores with no spaces up to 64 characters in length) 
+    Description: Name of Lambda function (letters, numbers, hyphens, or underscores with no spaces up to 64 characters in length)
     ConstraintDescription: Enter a valid name
     Default: CloudFront-Invalidator
   pythonRuntime:
@@ -65,7 +63,7 @@ Parameters:
     Default: arm64
   scheduleExpression:
     Type: String
-    Description: Invalidation schedule in cron or rate expression format. Default is 6 pm (UTC+0) daily ( https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule-schedule.html )
+    Description: Invalidation schedule. Default is 6 pm (UTC+0) daily ( https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-create-rule-schedule.html )
     Default: "cron(0 18 * * ? *)"
   cloudFrontDistributions:
     Type: String
@@ -82,40 +80,52 @@ Resources:
     Properties:
       AssumeRolePolicyDocument:
         Statement:
-        - Action:
-          - sts:AssumeRole
-          Effect: Allow
-          Principal:
-            Service:
-            - lambda.amazonaws.com
-        Version: '2012-10-17'
+          - Action:
+              - sts:AssumeRole
+            Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+        Version: "2012-10-17"
       Path: "/"
       Policies:
-      - PolicyName: lambdaPolicy
-        PolicyDocument:
-          Version: '2012-10-17'          
-          Statement: # https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/access-control-managing-permissions.html
-          - Effect: Allow
-            Action:
-              - logs:CreateLogGroup
-            Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:*
-          - Effect: Allow
-            Action: 
-            - logs:CreateLogStream
-            - logs:PutLogEvents
-            Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${lambdaFunctionName}:*
-          - Effect: Allow
-            Action: 
-            - cloudfront:ListDistributions
-            - cloudfront:CreateInvalidation                         
-            Resource: "*"
+        - PolicyName: lambdaPolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement: # https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/access-control-managing-permissions.html
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${lambdaFunctionName}:*
+              - Effect: Allow
+                Action:
+                  - cloudfront:ListDistributions
+                  - cloudfront:CreateInvalidation
+                Resource: "*"
       Tags:
         - Key: StackName
           Value: !Sub ${AWS::StackName}
         - Key: StackId
           Value: !Sub ${AWS::StackId}
         - Key: Description
-          Value: !Sub 'Lambda function: ${lambdaFunctionName}'
+          Value: !Sub "Lambda function: ${lambdaFunctionName}"
+        - Key: GitHub
+          Value: https://github.com/aws-samples/cloudfront-invalidation-scheduler
+
+  lambdaFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      KmsKeyId: !Ref AWS::NoValue
+      RetentionInDays: !Ref AWS::NoValue
+      LogGroupName: !Sub /aws/lambda/${lambdaFunctionName}
+      Tags:
+        - Key: StackName
+          Value: !Sub ${AWS::StackName}
+        - Key: StackId
+          Value: !Sub ${AWS::StackId}
         - Key: GitHub
           Value: https://github.com/aws-samples/cloudfront-invalidation-scheduler
 
@@ -132,10 +142,10 @@ Resources:
         Variables:
           DISTRIBUTION_IDS: !Ref cloudFrontDistributions
           OBJECT_PATHS: !Ref cloudFrontObjectPaths
-      Runtime: !Ref pythonRuntime 
+      Runtime: !Ref pythonRuntime
       Timeout: 900
       Architectures:
-      - !Ref cpuArchitecture
+        - !Ref cpuArchitecture
       Code:
         ZipFile: |
           # Copyright Amazon.com, Inc. or its affiliates. All Rights Reserved.
@@ -194,15 +204,15 @@ Resources:
           Value: Invalidates CloudFront distribution
         - Key: GitHub
           Value: https://github.com/aws-samples/cloudfront-invalidation-scheduler
-          
+
   lambdaFunctionSchedule:
     Type: AWS::Events::Rule
     Properties:
       Description: !Sub "[${AWS::StackName}] - Execute lambda [${lambdaFunctionName}]"
       ScheduleExpression: !Ref scheduleExpression
       Targets:
-      - Arn: !GetAtt lambdaFunction.Arn
-        Id: '1'
+        - Arn: !GetAtt lambdaFunction.Arn
+          Id: "1"
 
   lambdaFunctionPermission:
     Type: AWS::Lambda::Permission
