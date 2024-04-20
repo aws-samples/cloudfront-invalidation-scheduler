@@ -11,9 +11,13 @@ As part of deployment process, you may want to [invalidate](https://docs.aws.ama
 Download [`template.yaml`](template.yaml) file and login to AWS [CloudFormation console](https://console.aws.amazon.com/cloudformation/home#/stacks/create/template). Choose **Create Stack**, **Upload a template file**, **Choose File**, select `template.yaml` and choose **Next**.
 
 Specify a **Stack name** and adjust parameters values as desired.
+
+CloudFront
 - `cloudFrontDistributions`: CloudFront distribution IDs separated by commas. Use `*` for all distributions in your AWS account. You can get list of IDs from [CloudFront console](https://console.aws.amazon.com/cloudfront/home) or with AWS CLI command (`aws cloudfront list-distributions --query "DistributionList.Items[*].[Id,DomainName,Aliases]"`). Default  is `*`
 - `cloudFrontObjectPaths`: [object paths](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Invalidation.html#invalidation-specifying-objects-paths) to invalidate separated by commas, e.g. `/images/*,/css/*` with `/*` for ALL. Note that * must be the last character. Default is `/*`
-- `scehduleExpression`: invalidation schedule in either [cron](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-cron-expressions.html) or [rate](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rate-expressions.html) expression format. Default (`cron(0 18 * * ? *)`) is **18:00 hrs UTC time daily**. Rate expression syntax may be useful for certain use cases; e.g. `rate(2 days)` will schedule invalidation every 2 days.
+- `scehduleExpression`: invalidation schedule in either [cron](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-cron-expressions.html) or [rate](https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-rate-expressions.html) expression format. Default (`cron(0 18 * * ? *)`) is **18:00 hrs UTC time daily**. Rate expression syntax may be useful for certain use cases; e.g. `rate(2 days)` will schedule invalidation every 2 days
+
+Lambda
 - `lambdaFunctionName`: Lambda function name. Default is `CloudFront-Invalidator`
 - `pythonRuntime`: Python 3 runtime version. Default is `python3.12`
 - `cpuArchitecture`: instruction set architecture (x86_64 or arm64). Default is `arm64`
