@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: CloudFront Invalidation Scheduler ( https://github.com/aws-samples/cloudfront-invalidation-scheduler )
+Description: CloudFront Invalidation Scheduler ( https://github.com/aws-samples/cloudfront-invalidation-scheduler ) (uksb-34jpgfj9lz)
 
 Metadata:
   License:
@@ -53,7 +53,7 @@ Parameters:
     Type: String
     AllowedPattern: "python3\\.\\d{1,2}"
     Description: Python 3 runtime version ( https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html )
-    Default: python3.12
+    Default: python3.13
   cpuArchitecture:
     Type: String
     AllowedValues:
@@ -205,6 +205,12 @@ Resources:
         - Key: GitHub
           Value: https://github.com/aws-samples/cloudfront-invalidation-scheduler
 
+  lambdaVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref lambdaFunction
+      Description: Version 1.0
+
   lambdaFunctionSchedule:
     Type: AWS::Events::Rule
     Properties:
@@ -228,7 +234,10 @@ Outputs:
     Value: https://console.aws.amazon.com/cloudfront/home
   lambdaFunctionCloudWatchLog:
     Description: Cloudwatch log for Lambda function
-    Value: !Sub "https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#logsV2:log-groups/log-group/$252Faws$252Flambda$252F${lambdaFunctionName}"
+    Value: !Sub https://console.aws.amazon.com/cloudwatch/home?region=${AWS::Region}#logsV2:log-groups/log-group/$252Faws$252Flambda$252F${lambdaFunctionName}
   cloudTrailEventHistory:
     Description: CloudTrail CreateInvalidation event history
     Value: https://console.aws.amazon.com/cloudtrail/home?region=us-east-1#/events?EventName=CreateInvalidation
+  eventBridgeConsole:
+    Description: Event Bridge
+    Value: !Sub https://console.aws.amazon.com/events/home?region=${AWS::Region}#/eventbus/default/rules/${lambdaFunctionSchedule}
