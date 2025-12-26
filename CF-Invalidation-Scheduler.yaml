@@ -53,7 +53,7 @@ Parameters:
     Type: String
     AllowedPattern: "python3\\.\\d{1,2}"
     Description: Python 3 runtime version ( https://docs.aws.amazon.com/lambda/latest/dg/lambda-python.html )
-    Default: python3.13
+    Default: python3.14
   cpuArchitecture:
     Type: String
     AllowedValues:
